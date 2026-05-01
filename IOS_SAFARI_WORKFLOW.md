@@ -42,6 +42,28 @@ Example:
    - **Settings → Apps → Safari → Extensions → [Your App] → ON**
    - Optional: Allow on all websites.
 
+
+### Command-line simulator build (auto-detects scheme)
+
+If `xcodebuild` fails with `does not contain a scheme named ...`, use the helper script below.
+It lists the project schemes and automatically picks the first shared scheme:
+
+```bash
+./scripts/build_ios_sim.sh
+```
+
+Optional arguments:
+
+```bash
+./scripts/build_ios_sim.sh <path_to_xcodeproj> <configuration> <destination>
+```
+
+Example:
+
+```bash
+./scripts/build_ios_sim.sh build-ios/ExtttSafariBridge/ExtttSafariBridge.xcodeproj Debug "platform=iOS Simulator,name=iPhone 15"
+```
+
 ## Bridge usage from extension JavaScript
 
 Use:
