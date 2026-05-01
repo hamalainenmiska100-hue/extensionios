@@ -64,6 +64,29 @@ Example:
 ./scripts/build_ios_sim.sh build-ios/ExtttSafariBridge/ExtttSafariBridge.xcodeproj Debug "platform=iOS Simulator,name=iPhone 15"
 ```
 
+### Troubleshooting missing scheme errors (`exit code 65`)
+
+If you are running `xcodebuild` directly and get:
+
+`The project named "..." does not contain a scheme named "..."`
+
+it means the scheme argument does not match a shared scheme in that `.xcodeproj`.
+
+Use one of these fixes:
+
+1. **Recommended:** use the helper (auto-detects a valid shared scheme):
+
+   ```bash
+   ./scripts/build_ios_sim.sh
+   ```
+
+2. **Manual:** list schemes, then pass one of those exact names:
+
+   ```bash
+   xcodebuild -list -project build-ios/ExtttSafariBridge/ExtttSafariBridge.xcodeproj
+   xcodebuild -project build-ios/ExtttSafariBridge/ExtttSafariBridge.xcodeproj -scheme "<SCHEME_FROM_LIST>" -configuration Debug -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 15" CODE_SIGNING_ALLOWED=NO clean build
+   ```
+
 ## Bridge usage from extension JavaScript
 
 Use:
