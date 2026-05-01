@@ -1,0 +1,55 @@
+name: iOS Safari App CI Build
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-ios-app:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Ensure generator script is executable
+        run: chmod +x scripts/create_ios_safari_app.sh
+
+      - name: Generate Xcode project from extension zip
+        run: ./scripts/create_ios_safari_app.sh
+
+      - name: Locate generated project and scheme
+        id: locate
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          PROJECT_PATH="$(find build-ios -name '*.xcodeproj' | head -n 1)"
+          if [[ -z "${PROJECT_PATH:-}" ]]; then
+            echo "No generated .xcodeproj found under build-ios"
+            exit 1
+          fi
+
+          PROJECT_NAME="$(basename "$PROJECT_PATH" .xcodeproj)"
+          SCHEME_NAME="$PROJECT_NAME"
+
+          echo "project_path=$PROJECT_PATH" >> "$GITHUB_OUTPUT"
+          echo "scheme_name=$SCHEME_NAME" >> "$GITHUB_OUTPUT"
+
+          echo "Using project: $PROJECT_PATH"
+          echo "Using scheme: $SCHEME_NAME"
+
+      - name: Build app and extension for iOS Simulator
+        run: |
+          set -euo pipefail
+
+          xcodebuild \
+            -project "${{ steps.locate.outputs.project_path }}" \
+            -scheme "${{ steps.locate.outputs.scheme_name }}" \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 15' \
+            CODE_SIGNING_ALLOWED=NO \
+            clean build
