@@ -43,15 +43,11 @@ xcrun safari-web-extension-converter \
   --force
 
 APP_SWIFT="$(find "$PROJECT_DIR" -name '*App.swift' | head -n 1 || true)"
-if [[ -z "$APP_SWIFT" ]]; then
-  echo "❌ Could not find App.swift in generated project."
-  exit 1
-fi
+if [[ -n "$APP_SWIFT" ]]; then
+  APP_GROUP_DIR="$(dirname "$APP_SWIFT")"
+  CONTENT_SWIFT="$APP_GROUP_DIR/ContentView.swift"
 
-APP_GROUP_DIR="$(dirname "$APP_SWIFT")"
-CONTENT_SWIFT="$APP_GROUP_DIR/ContentView.swift"
-
-cat > "$CONTENT_SWIFT" <<'SWIFT'
+  cat > "$CONTENT_SWIFT" <<'SWIFT'
 import SwiftUI
 
 struct ContentView: View {
@@ -83,6 +79,9 @@ struct ContentView: View {
     }
 }
 SWIFT
+else
+  echo "⚠️ App.swift not found in generated project; skipping ContentView.swift customization."
+fi
 
 # Add a basic native bridge endpoint available to extension scripts as browser.runtime.sendNativeMessage.
 HANDLER_SWIFT="$(find "$PROJECT_DIR" -name 'SafariWebExtensionHandler.swift' | head -n 1 || true)"
